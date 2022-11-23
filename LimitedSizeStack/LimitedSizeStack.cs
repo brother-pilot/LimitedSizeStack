@@ -27,7 +27,8 @@ namespace TodoApplication
     public class LimitedSizeStack<T>
     {
         public readonly int Limit;
-        public List<T> items;
+        public List<T> items = new List<T>();
+        public int Count { set; get; }
 
         public LimitedSizeStack(int limit)
         {
@@ -39,33 +40,38 @@ namespace TodoApplication
             if (Count < Limit) 
             { 
                 this.items.Add(item);
+                Count++;
             }
             else
             {
-                this.items.RemoveAt(0);
-                this.items.Add(item);
+                if (Limit != 0)
+                {
+                    this.items.RemoveAt(0);
+                    this.items.Add(item);
+                }
             }
         }
 
         public T Pop()
         {
             T result;
-            if (Count != null)
+            if (Count != 0)
             {
                 result = items[Count - 1];
                 this.items.RemoveAt(Count - 1);
+                Count--;
             }
             else
                 result = default(T); 
             return result;
         }
 
-        public int Count
+        /*public int Count
         {
             get
             {
                 return this.items.Count;
             }
-        }
+        }*/
     }
 }
