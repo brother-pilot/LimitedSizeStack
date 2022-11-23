@@ -26,28 +26,26 @@ namespace TodoApplication
 {
     public class LimitedSizeStack<T>
     {
-        public readonly int Limit;
-        public List<T> items = new List<T>();
-        public int Count { set; get; }
+        private readonly int limit;
+        private LinkedList<T> items = new LinkedList<T>();
 
         public LimitedSizeStack(int limit)
         {
-            Limit = limit;
+            this.limit = limit;
         }
 
         public void Push(T item)
         {
-            if (Count < Limit) 
+            if (Count < limit) 
             { 
-                this.items.Add(item);
-                Count++;
+                this.items.AddFirst(item);
             }
             else
             {
-                if (Limit != 0)
+                if (limit != 0)
                 {
-                    this.items.RemoveAt(0);
-                    this.items.Add(item);
+                    this.items.RemoveLast();
+                    this.items.AddFirst(item);
                 }
             }
         }
@@ -57,21 +55,20 @@ namespace TodoApplication
             T result;
             if (Count != 0)
             {
-                result = items[Count - 1];
-                this.items.RemoveAt(Count - 1);
-                Count--;
+                result = items.First();
+                this.items.RemoveFirst();
             }
             else
                 result = default(T); 
             return result;
         }
 
-        /*public int Count
+        public int Count
         {
             get
             {
                 return this.items.Count;
             }
-        }*/
+        }
     }
 }
