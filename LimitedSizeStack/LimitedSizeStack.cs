@@ -26,8 +26,8 @@ namespace TodoApplication
 {
     public class LimitedSizeStack<T>
     {
-        public readonly int Limit;
-        public List<T> items = new List<T>();
+        private readonly int Limit;
+        private List<T> items = new List<T>();
         public int Count { set; get; }
 
         public LimitedSizeStack(int limit)
