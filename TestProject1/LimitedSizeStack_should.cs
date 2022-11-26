@@ -111,7 +111,7 @@ namespace TodoApplication
             Assert.AreEqual(0, stack.Count);
         }
 
-        /*[Test]
+        [Test]
         [Description("Стек не должен ссылаться на элементы, которые уже удалены из него")]
         public void StackDontKeepAllElements()
         {
@@ -127,6 +127,6 @@ namespace TodoApplication
             Assert.AreEqual(70, counter.Value);
             stack.Push(new FinalizableClass(counter)); // Чтобы объект стека не собрался сборщиком мусора раньше времени
         }
-        */
+        
     }
 }
