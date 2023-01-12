@@ -21,33 +21,73 @@ namespace TodoApplication
 {
     public class ListModel<TItem>
     {
-        public List<TItem> Items { get; }
-        public int Limit;
+        //public List<TItem> Items { get; }
+        //public int Limit;
         //public LimitedSizeStack<List<object>> History { get; }
         Invoker invoker;
         Receiver receiver;
 
        public ListModel(int limit)
         {
-            Items = new List<TItem>();
             //History= new LimitedSizeStack<List<object>>(limit);
-            Limit = limit;
+            //Items = new List<TItem>();
+            //Limit = limit;
             invoker = new Invoker();
-            receiver = new Receiver();
+            receiver = new Receiver(limit);
+            invoker.SetCommand(new ConcreteCommand(receiver, limit));
         }
 
         public void AddItem(TItem item)
         {
-            //Items.Add(item);
+            Items.Add(item);
             //History.Push(new List<object> { "add", item });
-            invoker.Add(item);
+            //invoker.Add(item);
+            invoker.Execute(new List<object> { "add", item });
         }
 
         public void RemoveItem(int index)
         {
             //History.Push(new List<object> { "rem", index, Items[index] });
-            //Items.RemoveAt(index);
-            invoker.RemoveAt(index);
+            Items.RemoveAt(index);
+            //invoker.RemoveAt(index);
+            invoker.Execute(new List<object> { "rem", index, Items[index] });
+        }
+
+        public bool CanUndo()//возвращает true, если на данный момент история действий не пуста
+        {
+            //return false;
+            return invoker.CanUndo();
+        }
+
+
+    }
+
+    interface ICommand
+    {
+        void Execute();
+        void UnExecute();
+    }
+
+    class ConcreteCommand : ICommand
+    {
+        Receiver receiver; //подключаем исполнителя команды
+        public LimitedSizeStack<List<object>> History { get; }
+       
+
+        public ConcreteCommand(Receiver r, int limit) //указваем какой конкретно исполнитель
+        {
+            receiver = r;
+            History = new LimitedSizeStack<List<object>>(limit);
+        }
+        public void Execute(List<object> obj) //string str, TItem item) //прописана реализация команды execute т.е. чего конктретно то делаем
+        {
+            History.Push(obj);
+            //receiver.Add();
+        }
+
+        public void UnExecute() //прописана реализация команды Undo т.е. чего конктретно то делаем
+        {
+            receiver.Off();
         }
 
         public bool CanUndo()//возвращает true, если на данный момент история действий не пуста
@@ -57,38 +97,8 @@ namespace TodoApplication
         }
 
 
-    }
 
-    abstract class Command // абстрактный класс с командами
-
-    {
-        public abstract void AddItem();
-        public abstract void RemoveItem();
-        public abstract void Undo();
-    }
-
-    class ConcreteCommand : Command
-    {
-        Receiver receiver; //подключаем исполнителя команды
-        public LimitedSizeStack<List<object>> History { get; }
-
-        public ConcreteCommand(Receiver r) //указваем какой конкретно исполнитель
-        {
-            receiver = r;
-        }
-        public override void AddItem() //прописана реализация команды execute т.е. чего конктретно то делаем
-        {
-            receiver.Add();
-        }
-
-        public override void RemoveItem() //прописана реализация команды Undo т.е. чего конктретно то делаем
-        {
-            receiver.Off();
-        }
-
-        
-
-        public override void Undo() //отменяет последнее действие из истории
+        public void Undo() //отменяет последнее действие из истории
         {
 
             var command = History.Pop();
@@ -103,6 +113,14 @@ namespace TodoApplication
     // Receiver - получатель команды. Определяет действия, которые должны выполняться в результате запроса
     class Receiver
     {
+        public List<TItem> Items { get; }
+        public int Limit;
+        TItem item = new ListModel<TItem>();
+        public Receiver(int limit)
+        {
+            Items = new List<TItem>();
+            Limit = limit;
+        }
         public void Add(TItem item)
         {
             Items.Add(item); ;
@@ -116,19 +134,18 @@ namespace TodoApplication
     // Invoker - инициатор команды- вызывает команду для выполнения определенного запроса
     class Invoker
     {
-        Command command;//завязываем какие у нас команды будут выполняться. По идее здесь должны быть расписаны все команды по отдельности
-        
-        public void SetCommand(Command c)
+        ICommand command;//завязываем какие у нас команды будут выполняться. По идее здесь должны быть расписаны все команды по отдельности
+        public void SetCommand(ICommand c)
         {
             command = c;
         }
-        public void Add(TItem item)
+        public void Execute(List<object> obj)
         {
-            command.Execute();
+            command.Execute(obj);
         }
-        public void PressButtonCancel(int index)
+        public void CanUndo(List<object> obj)
         {
-            command.Undo();
+            command.CanUndo();
         }
     }
 
